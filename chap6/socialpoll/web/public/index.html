@@ -22,7 +22,7 @@
       var update = function() {
         $.get("http://localhost:8080/polls/?key=abc123", null, null, "json")
           .done(function(polls) {
-            $.get("#polls").empty();
+            $("#polls").empty();
             for (var p in polls) {
               var poll = polls[p];
               $("#polls").append(
@@ -33,9 +33,12 @@
                 )
               )
             }
-          })
+          }
+        );
+        window.setTimeout(update, 10000);
       }
-    })
+      update();
+    });
     </script>
   </body>
 </html>
