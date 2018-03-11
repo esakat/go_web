@@ -1,4 +1,5 @@
 package main
+
 import (
 	"net/http"
 	"sync"
@@ -6,7 +7,7 @@ import (
 
 var (
 	varsLock sync.RWMutex
-	vars map[*http.Request]map[string]interface
+	vars     map[*http.Request]map[string]interface{}
 )
 
 func OpenVars(r *http.Request) {
