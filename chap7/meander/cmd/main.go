@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"runtime"
 
-	"github.com/oreilly-japan/go-programming-blueprints/chapter7/meander"
+	"../../meander"
 )
 
 func main() {
