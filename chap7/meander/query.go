@@ -3,8 +3,12 @@ package meander
 import (
 	"encoding/json"
 	"fmt"
+	"log"
+	"math/rand"
 	"net/http"
 	"net/url"
+	"sync"
+	"time"
 )
 
 var APIKey string
@@ -21,7 +25,7 @@ type Place struct {
 	*googleGeometry `json:"geometry"`
 	Name            string         `json:"name"`
 	Icon            string         `json:"icon"`
-	Photes          []*googlePhoto `json:"photes"`
+	Photos          []*googlePhoto `json:"photos"`
 	Vicinity        string         `json:"vicinity"`
 }
 type googleResponse struct {
@@ -43,7 +47,7 @@ func (p *Place) Public() interface{} {
 	return map[string]interface{}{
 		"name":     p.Name,
 		"icon":     p.Icon,
-		"photes":   p.Photes,
+		"photos":   p.Photos,
 		"vicinity": p.Vicinity,
 		"lat":      p.Lat,
 		"lng":      p.Lng,
@@ -72,4 +76,40 @@ func (q *Query) find(types string) (*googleResponse, error) {
 		return nil, err
 	}
 	return &response, nil
+}
+
+// 問い合わせを一斉に行い、その結果を返します
+func (q *Query) Run() []interface{} {
+	rand.Seed(time.Now().UnixNano())
+	var w sync.WaitGroup
+	var l sync.Mutex
+	places := make([]interface{}, len(q.Journey))
+	for i, r := range q.Journey {
+		w.Add(1)
+		go func(types string, i int) {
+			defer w.Done()
+			response, err := q.find(types)
+			if err != nil {
+				log.Println("施設の検索に失敗しました:", err)
+				return
+			}
+			if len(response.Results) == 0 {
+				log.Println("施設が見つかりませんでした:", types)
+				return
+			}
+			for _, result := range response.Results {
+				for _, photo := range result.Photos {
+					photo.URL = "https://maps.googleapis.com/maps/api/place/photo?" +
+						"maxwidth=1000&photoreference=" + photo.PhotoRef +
+						"&key=" + APIKey
+				}
+			}
+			randI := rand.Intn(len(response.Results))
+			l.Lock()
+			places[i] = response.Results[randI]
+			l.Unlock()
+		}(r, i)
+	}
+	w.Wait() // 全てのリクエストの完了を待ちます
+	return places
 }
