@@ -11,7 +11,7 @@ type googleResponse struct {
 	Results []*Place `json:"results"`
 }
 type googleGeometry struct {
-	*googleGeometry `json:"location"`
+	*googleLocation `json:"location"`
 }
 type googleLocation struct {
 	Lat float64 `json:"lat"`
@@ -20,4 +20,15 @@ type googleLocation struct {
 type googlePhoto struct {
 	PhotoRef string `json:"photo_reference"`
 	URL      string `json:"url"`
+}
+
+func (p *Place) Public() interface{} {
+	return map[string]interface{}{
+		"name":     p.Name,
+		"icon":     p.Icon,
+		"photes":   p.Photes,
+		"vicinity": p.Vicinity,
+		"lat":      p.Lat,
+		"lng":      p.Lng,
+	}
 }
