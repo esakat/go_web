@@ -3,8 +3,6 @@ package meander_test
 import (
 	"testing"
 
-	"github.com/oreilly-japan/go-programming-blueprints/chapter7/meander"
-
 	"../meander"
 	"github.com/cheekybits/is"
 )
